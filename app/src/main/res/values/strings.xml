@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MAXS Camera Module</string>
+    <string name="app_module_receiver_label">MAXS Camera Module Receiver</string>
+    <string name="pref_app_debug_log_key">DEBUG_LOG</string>
+    <string name="version">0.1</string>
+    <string name="copyright">Copyright (c) 2015 Finn Herzfeld</string>
+</resources>

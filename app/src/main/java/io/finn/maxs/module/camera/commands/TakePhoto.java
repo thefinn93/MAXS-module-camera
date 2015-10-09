@@ -6,6 +6,7 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraManager;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.SurfaceView;
 
@@ -39,31 +40,38 @@ public class TakePhoto extends SubCommand {
     }
 
     @Override
-    public Message execute(String arguments, Command command, MAXSModuleIntentService service) throws Throwable {
+    public Message execute(String arguments, final Command command, final MAXSModuleIntentService service) throws Throwable {
 
-        SurfaceView sv;
-        Camera mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
 
-//        try {
-//            mCamera.setPreviewTexture(new SurfaceTexture(10));
-//        } catch (IOException e1) {
-//            Log.e(TAG, e1.getMessage());
-//        }
+        new AsyncTask<Void, Void, String>() {
 
-        Camera.Parameters params = mCamera.getParameters();
-//        params.setPreviewSize(640, 480);
-        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-        params.setPictureFormat(ImageFormat.JPEG);
-        mCamera.setParameters(params);
-//        mCamera.startPreview();
-        mCamera.takePicture(null, null, null, new Camera.PictureCallback() {
             @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
-                Log.i(TAG, data.toString());
-            }
-        });
+            protected String doInBackground(Void...args) {
+                SurfaceView sv;
+                Camera mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
 
-        Message message = new Message("If this module worked, I'd be taking a photo right now!");
+                Camera.Parameters params = mCamera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                params.setPictureFormat(ImageFormat.JPEG);
+                mCamera.setParameters(params);
+
+                mCamera.takePicture(null, null, null, new Camera.PictureCallback() {
+
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+                        Log.i(TAG, "Took photo");
+                        service.send(new Message(data.toString()), command.getId());
+
+                    }
+                });
+                return "I am required to return a string";
+            }
+
+
+
+        }.execute();
+
+        Message message = new Message("Taking a photo....");
         return message;
     }
 
